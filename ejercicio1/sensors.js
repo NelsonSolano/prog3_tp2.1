@@ -1,4 +1,19 @@
-class Sensor {}
+class Sensor {
+    // cargamos la definicion de la clase sensor de acuerdo a la consigna   
+    constructor(id, name, type, value, unit, updated_at){
+        this.id = id;
+        this.name = name;
+        this.type = type;
+        this.value = value;
+        this.unit = unit;
+        this.updated_at = updated_at;
+    }
+    // Implementamos la propiedad para actualizar el valor del sensor y la fecha
+    set updateValue(newValue) {
+        this.value=newValue;
+        this.updated_at= new Date().toISOString();
+    }
+}
 
 class SensorManager {
     constructor() {
@@ -32,8 +47,20 @@ class SensorManager {
             console.error(`Sensor ID ${id} no encontrado`);
         }
     }
-
-    async loadSensors(url) {}
+    // implementamos el metodo loadSensors
+    // de esta manera obtenemos los datos del archivo json
+    async loadSensors(url) {
+        try {
+            const response = await fetch(url);
+            const sensorsData = await response.json();
+            this.sensors = sensorsData.map(sensor => new Sensor(
+                sensor.id, sensor.name, sensor.type, sensor.value, sensor.unit, sensor.updated_at
+            ));
+            this.render();
+        } catch (error) {
+            console.error('Error al cargar los sensores:', error);
+        }
+    }
 
     render() {
         const container = document.getElementById("sensor-container");

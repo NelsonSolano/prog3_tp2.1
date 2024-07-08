@@ -4,15 +4,46 @@ class Currency {
         this.name = name;
     }
 }
-
+// Primer paso
 class CurrencyConverter {
-    constructor() {}
+    // Definimos el constructor
+    // apiUrl representara la url de la api de Frankfurter
+    constructor(apiUrl) {
+        this.apiUrl = apiUrl;
+        this.currencies = [];
+    }
+    //getCurrencies(apiUrl) {}
+    // Segundo paso
+    // Definimos el metodo asincrono para cargar los datos de monedas
+    async getCurrencies() {
+        try {
+            const response = await fetch(`${this.apiUrl}/currencies`);
+            const data = await response.json();
+            this.currencies = Object.keys(data).map(code => new Currency(code, data[code]));
+        } catch (error) {
+            console.error('No se pudo obtener la informacion de monedas:', error);
+        }
+    }
 
-    getCurrencies(apiUrl) {}
-
-    convertCurrency(amount, fromCurrency, toCurrency) {}
+    //Tercer paso
+    // Metodo para obtener la conversion de una moneda a otra
+    async convertCurrency(amount, fromCurrency, toCurrency) {
+        // en caso de que los tipos de monera de origen y destino sean iguales
+        // no se realizara la conversion y solamente se devolvera el monto ingresado
+        if (fromCurrency.code === toCurrency.code) {
+            return amount;
+        }
+        // si especifican otro tipo de monenas distintos se procede a realizar la conversion
+        try {
+            const response = await fetch(`${this.apiUrl}/latest?amount=${amount}&from=${fromCurrency.code}&to=${toCurrency.code}`);
+            const data = await response.json();
+            return data.rates[toCurrency.code];
+        } catch (error) {
+            console.error('Error al convertir tipo de moneda:', error);
+            return null;
+        }
+    }
 }
-
 document.addEventListener("DOMContentLoaded", async () => {
     const form = document.getElementById("conversion-form");
     const resultDiv = document.getElementById("result");

@@ -1,3 +1,4 @@
+// Primer paso completamos la clase Card
 class Card {
     constructor(name, img) {
         this.name = name;
@@ -31,8 +32,23 @@ class Card {
         const cardElement = this.element.querySelector(".card");
         cardElement.classList.remove("flipped");
     }
+    // Definimos el nuevo metodo toggleFlip cambia el estado de volteo de la carta en función de su estado actual
+    toggleFlip() {
+        this.isFlipped = !this.isFlipped;
+        // comprobamos si es dada vuelta o no
+        if (this.isFlipped) {
+            this.#flip();
+        } else {
+            this.#unflip();
+        }
+    }
+    // Con este nuevo metodo verificamos si la carta actual coincide con otra carta
+    matches(otherCard) {
+        return this.name === otherCard.name;
+    }
 }
 
+// Segundo paso modificamos la clase board
 class Board {
     constructor(cards) {
         this.cards = cards;
@@ -74,8 +90,32 @@ class Board {
             this.onCardClick(card);
         }
     }
+
+    // Metodo para mezclar las cartas
+    // En este caso el criterio a usar sera de manera aleatorio
+    shuffleCards() {
+        this.cards.sort(() => Math.random() - 0.5);
+    }
+    
+    // Metodo para volver al estado inicial a su estado incial
+    flipDownAllCards() {
+        this.cards.forEach(card => {
+            if (card.isFlipped) {
+                card.toggleFlip();
+            }
+        });
+    }
+
+    // Con este metodo reiniciamos el tablero
+    reset() {
+        this.shuffleCards();
+        this.flipDownAllCards();
+        this.render();
+    }
+
 }
 
+// Por ultimo modificamos la clase MemoryGame
 class MemoryGame {
     constructor(board, flipDuration = 500) {
         this.board = board;
@@ -101,6 +141,25 @@ class MemoryGame {
                 setTimeout(() => this.checkForMatch(), this.flipDuration);
             }
         }
+    }
+    // Con este Metodo podremos verificar si las cartas que estan dadas vuelta coinciden
+    checkForMatch() {
+        const [card1, card2] = this.flippedCards;
+        if (card1.matches(card2)) {
+            // En caso de que coincidan añadimos a las cartas emparejadas
+            this.matchedCards.push(card1, card2);
+        } else {
+            card1.toggleFlip();
+            card2.toggleFlip();
+        }
+        this.flippedCards = [];
+    }
+
+    // Con es metodo se reiniciara el juego
+    resetGame() {
+        this.flippedCards = [];
+        this.matchedCards = [];
+        this.board.reset();
     }
 }
 
